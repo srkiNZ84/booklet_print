@@ -36,23 +36,25 @@ numBooklets = (totalPages + 9)/10
 
 print("Going to have %s booklets" % numBooklets)
 
-bookletCounter = 1
-for page in range(totalPages):
+for bookletCounter in range(numBooklets):
+    for page in range(9):
+        basePage = bookletCounter * 10
+        endPage = (bookletCounter + 1) * 10
+        if(page % 2 == 0):
+            print("Getting page %s , flipping" % (basePage + page))
+            output.addPage(input1.getPage(basePage + page).rotateCounterClockwise(180))
+            print("Getting page %s , flipping" % (endPage - page - 1))
+            output.addPage(input1.getPage(endPage - page - 1).rotateCounterClockwise(180))
+        else:
+            print("Getting page %s " % (basePage + page))
+            output.addPage(input1.getPage(basePage + page))
+            print("Getting page %s " % (endPage - page - 1))
+            output.addPage(input1.getPage(endPage - page - 1))
 
-    if(page % 2 == 0):
-        print("Getting page %s , flipping" % page)
-        output.addPage(input1.getPage(page).rotateCounterClockwise(180))
-        print("Getting page %s , flipping" % (9 - page))
-        output.addPage(input1.getPage(9 - page).rotateCounterClockwise(180))
-    else:
-        print("Getting page %s " % page)
-        output.addPage(input1.getPage(page))
-        print("Getting page %s " % (9 - page))
-        output.addPage(input1.getPage(9 - page))
-
-    if(page % 5 == 0):
-        bookletCounter += 1
-        print("Starting new booklet %s" % bookletCounter)
+        if((9 - page) % 5 == 0):
+            bookletCounter += 1
+            print("Starting new booklet %s" % bookletCounter)
+            break
 
 #output.addPage(input1.getPage(0).rotateCounterClockwise(180))
 #output.addPage(input1.getPage(9).rotateCounterClockwise(180))
