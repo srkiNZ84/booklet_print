@@ -21,40 +21,53 @@ output = PdfFileWriter()
 print("Reading PDF file '" + inputPDF + "'...")
 input1 = PdfFileReader(file(inputPDF, "rb"))
 
-# TODO: Smarts go here
-# TODO: Need to split up PDF into "chunks" of 10 page each (make
-# configurable?)
-# TODO: Need to specify how to print out to make a "booklet", right now have
-# to print "two pages per sheet".
+
+def addBookletToOutput(inputFile, basePage, bookletSize,fileToWriteTo):
+    print("basepage %s, size %s" % (basePage, bookletSize))
+    for pages in range(bookletSize/2):
+        #print("processing page set %s" % pages)
+
+        lastPage = basePage + bookletSize
+        #print("last page is %s" % lastPage)
+
+        firstPage = basePage + pages
+        secondPage = lastPage - pages - 1
+
+        if(pages % 2 == 0):
+            print("processing pages %s and %s, going to flip them" % \
+                    (firstPage, secondPage))
+            fileToWriteTo.addPage(inputFile.getPage(firstPage).rotateCounterClockwise(180))
+            fileToWriteTo.addPage(inputFile.getPage(secondPage).rotateCounterClockwise(180))
+        else:
+            print("processing pages %s and %s" % \
+                    (firstPage, secondPage))
+            fileToWriteTo.addPage(inputFile.getPage(firstPage))
+            fileToWriteTo.addPage(inputFile.getPage(secondPage))
+
+# TODO: Make the number of pages per booklet configurable
 # TODO: Make it output two pages per sheet automatically
 
 # Get the number of pages
 print("document %s has %s pages." % (inputPDF, input1.getNumPages()))
 totalPages = input1.getNumPages()
-
-numBooklets = (totalPages + 9)/10
+# NOTE: As we're printing four pages per sheet of paper, the below needs to be
+# a multiple of four
+numPagesBooklet = 12
+numBooklets = (totalPages + numPagesBooklet - 1)/numPagesBooklet
 
 print("Going to have %s booklets" % numBooklets)
+print("Going to have %s pages per booket" % numPagesBooklet)
+lastBookletPages = totalPages % numPagesBooklet
+print("Last booklet is going to have %s pages" % lastBookletPages)
 
 for bookletCounter in range(numBooklets):
-    for page in range(9):
-        basePage = bookletCounter * 10
-        endPage = (bookletCounter + 1) * 10
-        if(page % 2 == 0):
-            print("Getting page %s , flipping" % (basePage + page))
-            output.addPage(input1.getPage(basePage + page).rotateCounterClockwise(180))
-            print("Getting page %s , flipping" % (endPage - page - 1))
-            output.addPage(input1.getPage(endPage - page - 1).rotateCounterClockwise(180))
-        else:
-            print("Getting page %s " % (basePage + page))
-            output.addPage(input1.getPage(basePage + page))
-            print("Getting page %s " % (endPage - page - 1))
-            output.addPage(input1.getPage(endPage - page - 1))
+    basePage = bookletCounter * numPagesBooklet
 
-        if((9 - page) % 5 == 0):
-            bookletCounter += 1
-            print("Starting new booklet %s" % bookletCounter)
-            break
+    bookletSize = numPagesBooklet
+    if(bookletCounter == numBooklets - 1 and totalPages % numPagesBooklet > 0 ):
+        bookletSize = totalPages % numPagesBooklet
+
+    addBookletToOutput(input1, basePage, bookletSize, output)
 
 #output.addPage(input1.getPage(0).rotateCounterClockwise(180))
 #output.addPage(input1.getPage(9).rotateCounterClockwise(180))
